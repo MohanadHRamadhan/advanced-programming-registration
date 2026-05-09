@@ -628,7 +628,12 @@ function updateMemberUI() {
 }
 
 // Init with 2 members
-addMember(); addMember();
+document.addEventListener('DOMContentLoaded', function() {
+  addMember(); addMember();
+  buildOptions(document.getElementById('choice1'));
+  buildOptions(document.getElementById('choice2'));
+  buildOptions(document.getElementById('choice3'));
+});
 
 // Dropdowns
 function buildOptions(selectEl, excludeVals = []) {
