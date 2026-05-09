@@ -59,7 +59,6 @@
     transition: background .35s;
   }
 
-  /* Theme toggle */
   .theme-btn {
     position: fixed;
     top: 1.25rem; left: 1.25rem;
@@ -84,7 +83,6 @@
     padding: 3rem 1.5rem 5rem;
   }
 
-  /* Header */
   header {
     text-align: center;
     margin-bottom: 2.5rem;
@@ -120,7 +118,6 @@
     max-width: 480px; margin: 0 auto;
   }
 
-  /* Cards */
   .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -154,7 +151,6 @@
   }
   .card-desc { font-size: .82rem; color: var(--muted); margin-top: .15rem; }
 
-  /* Fields */
   .fields-grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
   }
@@ -163,9 +159,7 @@
   .field { display: flex; flex-direction: column; gap: .45rem; }
   .field.full { grid-column: 1 / -1; }
 
-  label {
-    font-size: .78rem; font-weight: 600; color: var(--muted);
-  }
+  label { font-size: .78rem; font-weight: 600; color: var(--muted); }
 
   input, select {
     background: var(--surface);
@@ -205,9 +199,7 @@
   select option { background: var(--card); color: var(--text); }
   select option:disabled { color: var(--muted); }
 
-  .err-msg {
-    font-size: .76rem; color: var(--danger); display: none; margin-top: .2rem;
-  }
+  .err-msg { font-size: .76rem; color: var(--danger); display: none; margin-top: .2rem; }
 
   /* Members */
   .members-list { display: flex; flex-direction: column; gap: .8rem; }
@@ -275,7 +267,6 @@
 
   .project-row .select-wrap { flex: 1; }
 
-  /* Note */
   .note {
     background: rgba(79,142,247,.07);
     border: 1px solid rgba(79,142,247,.2);
@@ -298,14 +289,28 @@
     transition: transform .2s, box-shadow .2s;
     box-shadow: 0 4px 24px rgba(79,142,247,.28);
   }
+  .submit-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
   .submit-btn::before {
     content: ''; position: absolute; inset: 0;
     background: linear-gradient(135deg, rgba(255,255,255,.15), transparent);
     opacity: 0; transition: opacity .2s;
   }
-  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(79,142,247,.38); }
-  .submit-btn:hover::before { opacity: 1; }
-  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(79,142,247,.38); }
+  .submit-btn:hover:not(:disabled)::before { opacity: 1; }
+  .submit-btn:active:not(:disabled) { transform: translateY(0); }
+
+  /* Spinner */
+  .spinner {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    margin-left: .5rem;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   /* Success */
   #success-screen {
@@ -360,7 +365,6 @@
   }
   .summary-key { color: var(--muted); flex-shrink: 0; }
   .summary-val { color: var(--text); font-weight: 600; text-align: left; }
-
   .divider { border: none; border-top: 1px solid var(--border); margin: .6rem 0; }
 
   .reset-btn {
@@ -373,7 +377,25 @@
   }
   .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* Animations */
+  /* Error toast */
+  .toast {
+    position: fixed;
+    bottom: 2rem; left: 50%; transform: translateX(-50%);
+    background: var(--danger);
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    font-size: .88rem;
+    padding: .75rem 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.3);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity .3s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+
   @keyframes fadeDown {
     from { opacity: 0; transform: translateY(-18px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -392,6 +414,7 @@
 <body data-theme="dark">
 
 <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="تبديل المظهر">🌙</button>
+<div class="toast" id="toast"></div>
 
 <div class="wrapper">
 
@@ -403,7 +426,7 @@
 
   <div id="form-screen">
 
-    <!-- القائد -->
+    <!-- Leader -->
     <div class="card" style="animation-delay:.05s">
       <div class="card-header">
         <div class="card-icon blue">👤</div>
@@ -425,24 +448,24 @@
       </div>
     </div>
 
-    <!-- الأعضاء -->
+    <!-- Members -->
     <div class="card" style="animation-delay:.12s">
       <div class="card-header">
         <div class="card-icon purple">🎓</div>
         <div>
           <div class="card-title">أعضاء المجموعة</div>
-          <div class="card-desc">أدخل أسماء الأعضاء كاملة (من 3 إلى 4 أعضاء)</div>
+          <div class="card-desc">أدخل أسماء الأعضاء (عضوان على الأقل، بحد أقصى 3 أعضاء)</div>
         </div>
       </div>
       <div class="members-list" id="members-list"></div>
       <button class="add-btn" id="add-member-btn" onclick="addMember()">
-        ＋ إضافة عضو
+        ＋ إضافة عضو ثالث
         <span id="member-count-hint" style="font-size:.75rem;opacity:.55"></span>
       </button>
       <span class="err-msg" id="err-members" style="display:block;margin-top:.5rem"></span>
     </div>
 
-    <!-- المشاريع -->
+    <!-- Projects -->
     <div class="card" style="animation-delay:.2s">
       <div class="card-header">
         <div class="card-icon green">📋</div>
@@ -486,15 +509,15 @@
       </div>
     </div>
 
-    <button class="submit-btn" onclick="submitForm()">إرسال التسجيل ←</button>
+    <button class="submit-btn" id="submit-btn" onclick="submitForm()">إرسال التسجيل ←</button>
 
   </div>
 
-  <!-- شاشة النجاح -->
+  <!-- Success -->
   <div id="success-screen">
     <div class="success-icon">✓</div>
     <div class="success-title">تم التسجيل بنجاح!</div>
-    <p class="success-sub">تم استلام تسجيل مجموعتك. سيُعلن الأستاذ عن توزيع المشاريع النهائي قريباً.</p>
+    <p class="success-sub">تم حفظ بيانات مجموعتك. سيُعلن الأستاذ عن توزيع المشاريع النهائي قريباً.</p>
     <div class="summary-card" id="summary-card"></div>
     <button class="reset-btn" onclick="resetForm()">→ تسجيل مجموعة أخرى</button>
   </div>
@@ -502,6 +525,12 @@
 </div>
 
 <script>
+// ============================================================
+//  *** PASTE YOUR APPS SCRIPT URL BELOW ***
+// ============================================================
+const SCRIPT_URL = '/api/register';
+// ============================================================
+
 const PROJECTS = [
   { num:1,  title:"دفتر جهات الاتصال" },
   { num:2,  title:"نظام كشف درجات الطلاب" },
@@ -534,20 +563,22 @@ const PROJECTS = [
 function toggleTheme() {
   const body = document.body;
   const btn  = document.getElementById('theme-btn');
-  if (body.dataset.theme === 'dark') {
-    body.dataset.theme = 'light';
-    btn.textContent = '🌞';
-  } else {
-    body.dataset.theme = 'dark';
-    btn.textContent = '🌙';
-  }
+  if (body.dataset.theme === 'dark') { body.dataset.theme = 'light'; btn.textContent = '🌞'; }
+  else { body.dataset.theme = 'dark'; btn.textContent = '🌙'; }
 }
 
-// Members
+// Toast
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// Members — start with 2 fixed, add button for 3rd
 let memberCount = 0;
 
 function addMember() {
-  if (memberCount >= 4) return;
+  if (memberCount >= 3) return;
   memberCount++;
   const list = document.getElementById('members-list');
   const row  = document.createElement('div');
@@ -556,11 +587,12 @@ function addMember() {
   row.innerHTML = `
     <div class="member-num">${memberCount}</div>
     <input type="text" id="member-${memberCount}" placeholder="اسم العضو ${memberCount}" />
-    <button class="remove-btn" onclick="removeMember(${memberCount})" ${memberCount <= 3 ? 'disabled' : ''} title="حذف">✕</button>
+    <button class="remove-btn" onclick="removeMember(${memberCount})"
+      ${memberCount <= 2 ? 'disabled' : ''} title="حذف">✕</button>
   `;
   list.appendChild(row);
   updateMemberUI();
-  document.getElementById(`member-${memberCount}`).focus();
+  if (memberCount === 3) document.getElementById(`member-${memberCount}`).focus();
 }
 
 function removeMember(id) {
@@ -575,20 +607,28 @@ function removeMember(id) {
     inp.placeholder = `اسم العضو ${memberCount}`;
     const btn = r.querySelector('.remove-btn');
     btn.setAttribute('onclick', `removeMember(${memberCount})`);
-    btn.disabled = memberCount <= 3;
+    btn.disabled = memberCount <= 2;
   });
   updateMemberUI();
 }
 
 function updateMemberUI() {
-  document.getElementById('add-member-btn').disabled = memberCount >= 4;
-  document.getElementById('member-count-hint').textContent = `${memberCount} / 4`;
-  document.querySelectorAll('.member-row').forEach((r, i) => {
-    r.querySelector('.remove-btn').disabled = i < 2 || memberCount <= 3;
-  });
+  const addBtn = document.getElementById('add-member-btn');
+  const hint   = document.getElementById('member-count-hint');
+  addBtn.disabled  = memberCount >= 3;
+  hint.textContent = `${memberCount} / 3`;
+  addBtn.textContent = memberCount >= 3
+    ? '✓ تم إضافة العضو الثالث'
+    : '＋ إضافة عضو ثالث';
+  if (memberCount >= 3) {
+    const span = document.createElement('span');
+    span.style = 'font-size:.75rem;opacity:.55;margin-right:.4rem';
+    span.textContent = `${memberCount} / 3`;
+  }
 }
 
-addMember(); addMember(); addMember();
+// Init with 2 members
+addMember(); addMember();
 
 // Dropdowns
 function buildOptions(selectEl, excludeVals = []) {
@@ -660,28 +700,58 @@ function validate() {
 }
 
 // Submit
-function submitForm() {
+async function submitForm() {
   if (!validate()) return;
+
   const leaderName  = document.getElementById('leader-name').value.trim();
   const leaderEmail = document.getElementById('leader-email').value.trim();
   const members     = [...document.querySelectorAll('.member-row input')].map(i => i.value.trim());
   const c1 = document.getElementById('choice1').value;
   const c2 = document.getElementById('choice2').value;
   const c3 = document.getElementById('choice3').value;
-  const getTitle = n => PROJECTS.find(p => p.num === parseInt(n))?.title || '';
+  const getTitle = n => `${n}. ${PROJECTS.find(p => p.num === parseInt(n))?.title || ''}`;
 
-  document.getElementById('summary-card').innerHTML = `
-    <h3>ملخص التسجيل</h3>
-    <div class="summary-row"><span class="summary-key">القائد</span><span class="summary-val">${leaderName}${leaderEmail ? '<br><span style="font-size:.8rem;color:var(--muted);direction:ltr">'+leaderEmail+'</span>' : ''}</span></div>
-    <div class="summary-row"><span class="summary-key">الأعضاء</span><span class="summary-val">${members.join('<br>')}</span></div>
-    <hr class="divider">
-    <div class="summary-row"><span class="summary-key">الاختيار الأول</span><span class="summary-val">${c1}. ${getTitle(c1)}</span></div>
-    <div class="summary-row"><span class="summary-key">الاختيار الثاني</span><span class="summary-val">${c2}. ${getTitle(c2)}</span></div>
-    <div class="summary-row"><span class="summary-key">الاختيار الثالث</span><span class="summary-val">${c3}. ${getTitle(c3)}</span></div>
-  `;
-  document.getElementById('form-screen').style.display = 'none';
-  document.getElementById('success-screen').style.display = 'block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = 'جارٍ الإرسال... <span class="spinner"></span>';
+
+  const payload = {
+    leaderName,
+    leaderEmail,
+    members,
+    choice1: getTitle(c1),
+    choice2: getTitle(c2),
+    choice3: getTitle(c3),
+  };
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    // Build summary
+    document.getElementById('summary-card').innerHTML = `
+      <h3>ملخص التسجيل</h3>
+      <div class="summary-row"><span class="summary-key">القائد</span><span class="summary-val">${leaderName}${leaderEmail ? '<br><span style="font-size:.8rem;color:var(--muted);direction:ltr">'+leaderEmail+'</span>' : ''}</span></div>
+      <div class="summary-row"><span class="summary-key">الأعضاء</span><span class="summary-val">${members.join('<br>')}</span></div>
+      <hr class="divider">
+      <div class="summary-row"><span class="summary-key">الاختيار الأول</span><span class="summary-val">${getTitle(c1)}</span></div>
+      <div class="summary-row"><span class="summary-key">الاختيار الثاني</span><span class="summary-val">${getTitle(c2)}</span></div>
+      <div class="summary-row"><span class="summary-key">الاختيار الثالث</span><span class="summary-val">${getTitle(c3)}</span></div>
+    `;
+
+    document.getElementById('form-screen').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch (err) {
+    showToast('حدث خطأ أثناء الإرسال. الرجاء المحاولة مرة أخرى.');
+    btn.disabled = false;
+    btn.innerHTML = 'إرسال التسجيل ←';
+  }
 }
 
 // Reset
@@ -690,10 +760,12 @@ function resetForm() {
   document.getElementById('leader-email').value = '';
   document.getElementById('members-list').innerHTML = '';
   memberCount = 0;
-  addMember(); addMember(); addMember();
+  addMember(); addMember();
   ['choice1','choice2','choice3'].forEach(id => { buildOptions(document.getElementById(id)); document.getElementById(id).value = ''; });
   document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
   document.querySelectorAll('.err-msg').forEach(el => el.style.display = 'none');
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = false; btn.innerHTML = 'إرسال التسجيل ←';
   document.getElementById('success-screen').style.display = 'none';
   document.getElementById('form-screen').style.display = 'block';
   window.scrollTo({ top: 0, behavior: 'smooth' });
